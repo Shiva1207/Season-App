@@ -1,17 +1,46 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import ReactDom from 'react-dom';
+import SeasonDisplay from './seasonDisplay';
+import Spinner from './loader';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+class App extends React.Component {
+    // constructor(props){
+    //     super(props);
+    // This is the only time we do direct assignment to this.state  
+    //     this.state = {lat:null, errorMessage : ''}
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+    // };
+
+    state = {lat:null, errorMessage:''}
+
+    componentDidMount(){
+        window.navigator.geolocation.getCurrentPosition( 
+            (position) => this.setState( { lat : position.coords.latitude}),
+            (error) => this.setState({errorMessage : error.message})
+        )
+    }
+
+    renderbody () {
+         if(this.state.errorMessage && !this.state.lat){
+            return <Spinner message="you did not give location permission, please do it!" />
+        }else if(!this.state.errorMessage && this.state.lat) {
+            return (
+                 <SeasonDisplay lat={this.state.lat} />
+            );
+        }else {
+            return (
+                <Spinner message="Please accept loaction request!"/>
+            );
+        }
+    }
+
+    render() {
+        return (
+         <div className="borderred">
+               {this.renderbody()}
+         </div>
+        );
+    }
+}
+
+ReactDom.render( <App/>, document.querySelector('#root'))
